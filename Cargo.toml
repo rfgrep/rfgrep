@@ -57,7 +57,7 @@ parking_lot = "0.12.5"
 thiserror = "2.0"
 infer = "0.19"
 lru = "0.16"
-serde_with = "3.15.0"
+serde_with = "3.15.1"
 dirs = "6.0.0"
 toml = "0.9.4"
 tokio = { version = "1", features = ["rt-multi-thread", "macros", "time"] }
