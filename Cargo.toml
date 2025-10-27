@@ -85,7 +85,7 @@ tempfile = "3.23"
 rand = "0.9"
 criterion = "0.7"
 testing_logger = "0.1.1"
-proptest = "1.4"
+proptest = "1.9"
 quickcheck = "1.0"
 mockall = "0.13"
 
