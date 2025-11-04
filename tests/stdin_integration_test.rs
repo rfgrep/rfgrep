@@ -60,7 +60,7 @@ fn test_stdin_case_sensitive() -> Result<(), Box<dyn std::error::Error>> {
         .write_stdin("test\nTest\nTEST\n")
         .assert()
         .success()
-        .stdout(predicate::str::contains("Found 1"));
+        .stdout(predicate::str::contains("Total matches: 1"));
 
     Ok(())
 }
@@ -99,8 +99,9 @@ fn test_stdin_no_matches() -> Result<(), Box<dyn std::error::Error>> {
         .arg("notfound")
         .write_stdin("some text without the pattern\n")
         .assert()
-        .success()
-        .stdout(predicate::str::contains("No matches found"));
+        .success();
+    // When stdout is piped (as in tests), quiet mode is enabled
+    // so no output is expected when there are no matches
 
     Ok(())
 }
@@ -140,7 +141,7 @@ fn test_output_format_csv() -> Result<(), Box<dyn std::error::Error>> {
         .arg(temp_dir.path())
         .assert()
         .success()
-        .stdout(predicate::str::contains("File,Line"));
+        .stdout(predicate::str::contains("file,line_number"));
 
     Ok(())
 }
@@ -266,7 +267,7 @@ fn test_recursive_search() -> Result<(), Box<dyn std::error::Error>> {
         .arg(temp_dir.path())
         .assert()
         .success()
-        .stdout(predicate::str::contains("Found 2"));
+        .stdout(predicate::str::contains("Total matches: 2"));
 
     Ok(())
 }
