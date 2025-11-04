@@ -81,12 +81,10 @@ impl StdinSearcher {
         let reader = BufReader::new(stdin.lock());
 
         let mut matches = Vec::new();
-        let mut line_number = 0;
         let mut match_count = 0;
 
-        for line_result in reader.lines() {
-            line_number += 1;
-            let line = line_result.map_err(RfgrepError::Io)?;
+            for (line_number, line_result) in reader.lines().enumerate() {
+                let line = line_result.map_err(RfgrepError::Io)?;
 
             let is_match = regex.is_match(&line);
             let should_include = if options.invert_match {

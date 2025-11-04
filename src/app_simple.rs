@@ -310,7 +310,7 @@ impl RfgrepApp {
         // This prevents false positives in test environments where stdin might be redirected but empty
         let stdin_is_piped = !is_terminal::is_terminal(&std::io::stdin());
         let search_path_str = search_path.to_string_lossy();
-        let is_default_path = search_path_str == "." || search_path_str == "";
+    let is_default_path = search_path_str == "." || search_path_str.is_empty();
 
         // Only use stdin if it's piped AND we're searching the default path
         // If a specific path is given, prefer file search even if stdin is piped
