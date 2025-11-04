@@ -103,7 +103,7 @@ impl StdinSearcher {
                         if let Some(mat) = regex.find(&line) {
                             (mat.as_str().to_string(), mat.start(), mat.end())
                         } else {
-                            (String::new(), 0, 0)
+                            (String::new(), 0, line.len())
                         };
 
                     let search_match = SearchMatch {

@@ -254,7 +254,7 @@ fn test_multiple_extensions() -> Result<(), Box<dyn std::error::Error>> {
 fn test_recursive_search() -> Result<(), Box<dyn std::error::Error>> {
     let temp_dir = TempDir::new()?;
     let subdir = temp_dir.path().join("subdir");
-    fs::create_dir(&subdir)?;
+    fs::create_dir_all(&subdir)?;
     fs::write(temp_dir.path().join("top.txt"), "top level")?;
     fs::write(subdir.join("nested.txt"), "nested level")?;
 
