@@ -100,3 +100,7 @@ rustdoc-args = ["--cfg", "docsrs"]
 [[bench]]
 name = "compare"
 harness = false
+
+[[bench]]
+name = "simd_performance"
+harness = false

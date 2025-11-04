@@ -47,10 +47,21 @@ jobs:
           path: benchmarks/ 
         continue-on-error: true 
 
+      - name: Install dependencies for benchmark extraction
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y jq bc
+
       - name: Run benchmarks
         run: |
           cargo bench
-          
+
+      - name: Extract benchmark results
+        run: |
+          chmod +x ./scripts/extract_benchmark_results.sh
+          ./scripts/extract_benchmark_results.sh target/criterion benchmark_results.md
+          cat benchmark_results.md
+
       - name: Process benchmarks and update database
         run: |
           # This script parses target/criterion, correlates with git info, and updates benchmarks/benchmarks.db
@@ -91,9 +102,27 @@ jobs:
             benchmark_reports/
           retention-days: 90
       
+      - name: Update README with benchmark results
+        run: |
+          chmod +x ./scripts/update_readme_benchmarks.sh
+          ./scripts/update_readme_benchmarks.sh README.md benchmark_results.md
+
+      - name: Commit and push benchmark results to README
+        if: github.event_name != 'pull_request'
+        run: |
+          git config --local user.email "github-actions[bot]@users.noreply.github.com"
+          git config --local user.name "github-actions[bot]"
+          git add README.md
+          if git diff --staged --quiet; then
+            echo "No changes to commit"
+          else
+            git commit -m "chore: update benchmark results in README [skip ci]"
+            git push
+          fi
+
       - name: Upload persistent benchmark database
         uses: actions/upload-artifact@v4
         with:
-          name: benchmark-database 
+          name: benchmark-database
           path: benchmarks/benchmarks.db
           retention-days: 365 

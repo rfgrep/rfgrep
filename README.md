@@ -34,6 +34,7 @@ A command-line utility for recursively searching and listing files with advanced
   - Progress indicators
 
 - **Unix Pipeline Integration**
+  - Stdin support for piped input
   - Automatic quiet mode when piped
   - Seamless integration with grep, awk, sed, xargs
   - Count-only mode (`-c`)
@@ -45,14 +46,12 @@ A command-line utility for recursively searching and listing files with advanced
   - JSON, XML, HTML, Markdown formats
   - NDJSON for streaming JSON
 
-<!-- ## Performance
+<!-- BENCHMARK_RESULTS_START -->
+## Performance Benchmarks
 
-![Benchmark Results](https://github.com/kh3rld/rfgrep/raw/main/benches/comparison.png)
-
-Latest benchmarks (Linux x86_64):
-```bash
-# Updated automatically by CI
-cat benches/latest.txt -->
+Benchmark results will be automatically updated here when CI runs.
+![Benchmark Flamegraph](results/benchmark_flamegraph.svg)
+<!-- BENCHMARK_RESULTS_END -->
 
 ## Installation
 
@@ -376,7 +375,23 @@ rfgrep list --extensions rs | xargs wc -l
 rfgrep search "function" | grep "async"
 ```
 
-8. Advanced file type control:
+8. **New in v0.4.0:** Stdin/Pipe support:
+
+```bash
+# Pipe input from another command
+cat file.log | rfgrep search "error"
+
+# Chain with other Unix tools
+cat .zsh_history | rfgrep search "git" -c
+
+# Process command output
+echo "test data with error" | rfgrep search "error"
+
+# Complex pipeline
+cat *.log | rfgrep search "WARNING\|ERROR" --mode regex -c
+```
+
+9. Advanced file type control:
 
 ```bash
 rfgrep search "pattern" --file-types comprehensive --include-extensions pdf,docx
@@ -384,7 +399,7 @@ rfgrep search "pattern" --text-only --safety-policy conservative
 rfgrep search "pattern" --threads 4 --safety-policy performance
 ```
 
-9. Simulation and benchmarking:
+10. Simulation and benchmarking:
 
 ```bash
 rfgrep simulate

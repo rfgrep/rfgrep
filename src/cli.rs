@@ -132,10 +132,20 @@ EXAMPLES:
   # Search and copy results to clipboard
   rfgrep search "TODO" --copy --extensions rs,md
 
+  # Pipe input from another command
+  cat file.log | rfgrep search "error"
+
+  # Chain with other tools
+  cat .zsh_history | rfgrep search "git" -c
+
+  # Use with command substitution
+  echo "test data" | rfgrep search "test"
+
 PERFORMANCE TIPS:
   • Use --skip-binary for faster processing
   • Limit file size with --max-size
   • Use --dry-run to preview files first
+  • Pipe data directly for faster processing
 "#)]
     Search {
         pattern: String,
