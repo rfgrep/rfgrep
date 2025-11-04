@@ -94,7 +94,7 @@ jobs:
             # --threshold-percentage 5 # Example: fail if 5% slower
 
       - name: Upload benchmark artifacts
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v5
         with:
           name: benchmark-artifacts-${{ github.run_id }} 
           path: |
@@ -121,7 +121,7 @@ jobs:
           fi
 
       - name: Upload persistent benchmark database
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v5
         with:
           name: benchmark-database
           path: benchmarks/benchmarks.db
