@@ -12,6 +12,7 @@
 #![allow(clippy::needless_borrows_for_generic_args)]
 #![allow(clippy::too_many_arguments)]
 #![allow(clippy::print_literal)]
+mod app;
 mod app_simple;
 mod cli;
 mod config;

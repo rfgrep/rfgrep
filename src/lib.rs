@@ -89,6 +89,9 @@
 /// Simplified application architecture with async runtime support
 pub mod app_simple;
 
+/// Application submodules (stdin, filters, handlers, etc.)
+pub mod app;
+
 /// Command-line interface definitions and argument parsing
 pub mod cli;
 

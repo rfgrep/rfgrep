@@ -1,9 +1,9 @@
 //! Simplified application structure
+use crate::app::{stdin::StdinSearchOptions, FileFilter, FileFilterOptions, StdinSearcher};
 use crate::cli::{
     Cli, Commands, PluginCommands, SearchAlgorithm as CliSearchAlgorithm, SearchMode,
 };
 use crate::error::{Result as RfgrepResult, RfgrepError};
-use crate::file_types::{FileTypeClassifier, SearchDecision};
 use crate::output_formats::OutputFormatter;
 use crate::plugin_cli::PluginCli;
 use crate::plugin_system::{EnhancedPluginManager, PluginRegistry};
@@ -305,18 +305,48 @@ impl RfgrepApp {
         let search_pattern = self.build_search_pattern(pattern, mode);
         let search_algorithm = self.map_search_algorithm(algorithm);
 
+        // Check if stdin has data (piped input)
+        // Only search stdin if it's not a terminal AND the search path is explicitly NOT provided
+        // This prevents false positives in test environments where stdin might be redirected but empty
+        let stdin_is_piped = !is_terminal::is_terminal(&std::io::stdin());
+        let search_path_str = search_path.to_string_lossy();
+        let is_default_path = search_path_str == "." || search_path_str == "";
+
+        // Only use stdin if it's piped AND we're searching the default path
+        // If a specific path is given, prefer file search even if stdin is piped
+        if stdin_is_piped && is_default_path {
+            // Handle piped input from stdin using dedicated stdin module
+            let stdin_searcher = StdinSearcher::new();
+            let options = StdinSearchOptions {
+                search_pattern,
+                original_pattern: pattern.to_string(),
+                case_sensitive,
+                invert_match,
+                max_matches,
+                output_format,
+                ndjson,
+                count,
+                files_with_matches,
+                quiet,
+            };
+            return stdin_searcher.search(options).await;
+        }
+
         let files = self.collect_files(search_path, recursive);
-        let filtered_files = self.filter_files(
-            files,
+
+        // Use the FileFilter module for filtering
+        let filter_options = FileFilterOptions {
             max_size,
-            _skip_binary,
+            skip_binary: _skip_binary,
             safety_policy,
             include_extensions,
             exclude_extensions,
             search_all_files,
             text_only,
             file_types,
-        );
+        };
+        let file_filter = FileFilter::new(filter_options);
+        let filtered_files = file_filter.filter_files(files);
 
         if !quiet && output_format != crate::cli::OutputFormat::Json && !ndjson {
             println!("Searching {} files...", filtered_files.len());
@@ -374,191 +404,6 @@ impl RfgrepApp {
             .filter(|entry| entry.path().is_file())
             .map(|entry| entry.path().to_path_buf())
             .collect()
-    }
-
-    /// Filter files based on various criteria
-    fn filter_files(
-        &self,
-        files: Vec<std::path::PathBuf>,
-        max_size: Option<usize>,
-        skip_binary: bool,
-        safety_policy: crate::cli::SafetyPolicy,
-        include_extensions: Option<Vec<String>>,
-        exclude_extensions: Option<Vec<String>>,
-        search_all_files: bool,
-        text_only: bool,
-        file_types: crate::cli::FileTypeStrategy,
-    ) -> Vec<std::path::PathBuf> {
-        files
-            .into_iter()
-            .filter(|path| {
-                self.should_search_file(
-                    path,
-                    max_size,
-                    skip_binary,
-                    &safety_policy,
-                    &include_extensions,
-                    &exclude_extensions,
-                    search_all_files,
-                    text_only,
-                    &file_types,
-                )
-            })
-            .collect()
-    }
-
-    /// Determine if a file should be searched
-    fn should_search_file(
-        &self,
-        path: &Path,
-        max_size: Option<usize>,
-        skip_binary: bool,
-        safety_policy: &crate::cli::SafetyPolicy,
-        include_extensions: &Option<Vec<String>>,
-        exclude_extensions: &Option<Vec<String>>,
-        search_all_files: bool,
-        text_only: bool,
-        file_types: &crate::cli::FileTypeStrategy,
-    ) -> bool {
-        let metadata = match path.metadata() {
-            Ok(m) => m,
-            Err(_) => return false,
-        };
-
-        let ext = path
-            .extension()
-            .and_then(|e| e.to_str())
-            .map(|s| s.to_ascii_lowercase())
-            .unwrap_or_default();
-
-        // Check binary files
-        if skip_binary && crate::processor::is_binary(path) {
-            return false;
-        }
-
-        // Apply safety policy
-        if !self.apply_safety_policy(safety_policy, &metadata, &ext) {
-            return false;
-        }
-
-        // Check extension filters
-        if !self.apply_extension_filters(&ext, include_extensions, exclude_extensions) {
-            return false;
-        }
-
-        // Check file type strategy
-        if !self.should_search_by_file_type(
-            path,
-            &metadata,
-            &ext,
-            search_all_files,
-            text_only,
-            file_types,
-        ) {
-            return false;
-        }
-
-        // Check size limits
-        if !self.apply_size_limits(&metadata, max_size) {
-            return false;
-        }
-
-        true
-    }
-
-    /// Apply safety policy constraints
-    fn apply_safety_policy(
-        &self,
-        safety_policy: &crate::cli::SafetyPolicy,
-        metadata: &std::fs::Metadata,
-        ext: &str,
-    ) -> bool {
-        match safety_policy {
-            crate::cli::SafetyPolicy::Conservative => {
-                let file_size = metadata.len();
-                if file_size > 10 * 1024 * 1024 {
-                    return false;
-                }
-
-                let classifier = FileTypeClassifier::new();
-                classifier.is_always_search(ext)
-            }
-            crate::cli::SafetyPolicy::Performance => {
-                let file_size = metadata.len();
-                file_size <= 500 * 1024 * 1024
-            }
-            crate::cli::SafetyPolicy::Default => true,
-        }
-    }
-
-    /// Apply extension filters
-    fn apply_extension_filters(
-        &self,
-        ext: &str,
-        include_extensions: &Option<Vec<String>>,
-        exclude_extensions: &Option<Vec<String>>,
-    ) -> bool {
-        // Handle include extensions
-        if let Some(include_exts) = include_extensions {
-            if !include_exts.iter().any(|e| e.eq_ignore_ascii_case(ext)) {
-                return false;
-            }
-        }
-
-        // Handle exclude extensions
-        if let Some(exclude_exts) = exclude_extensions {
-            if exclude_exts.iter().any(|e| e.eq_ignore_ascii_case(ext)) {
-                return false;
-            }
-        }
-
-        true
-    }
-
-    /// Determine if file should be searched based on file type strategy
-    fn should_search_by_file_type(
-        &self,
-        path: &Path,
-        metadata: &std::fs::Metadata,
-        ext: &str,
-        search_all_files: bool,
-        text_only: bool,
-        file_types: &crate::cli::FileTypeStrategy,
-    ) -> bool {
-        if search_all_files {
-            return true;
-        }
-
-        if text_only {
-            let classifier = FileTypeClassifier::new();
-            return classifier.is_always_search(ext);
-        }
-
-        let classifier = FileTypeClassifier::new();
-        match file_types {
-            crate::cli::FileTypeStrategy::Comprehensive => !classifier.is_never_search(ext),
-            crate::cli::FileTypeStrategy::Conservative => classifier.is_always_search(ext),
-            crate::cli::FileTypeStrategy::Performance => {
-                classifier.is_always_search(ext) || classifier.is_conditional_search(ext)
-            }
-            crate::cli::FileTypeStrategy::Default => {
-                matches!(
-                    classifier.should_search(path, metadata),
-                    SearchDecision::Search(_) | SearchDecision::Conditional(_, _)
-                )
-            }
-        }
-    }
-
-    /// Apply size limits
-    fn apply_size_limits(&self, metadata: &std::fs::Metadata, max_size: Option<usize>) -> bool {
-        if let Some(max_size) = max_size {
-            let size_mb = metadata.len() as f64 / (1024.0 * 1024.0);
-            if size_mb > max_size as f64 {
-                return false;
-            }
-        }
-        true
     }
 
     /// Perform the actual search
