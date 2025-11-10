@@ -63,7 +63,7 @@ toml = "0.9.4"
 tokio = { version = "1", features = ["rt-multi-thread", "macros", "time"] }
 chrono = "0.4"
 serde_json = "1.0.142"
-ignore = "0.4.24"
+ignore = "0.4.25"
 nix = { version = "0.30", optional = false }
 libc = "0.2"
 ctrlc = "3.4"
