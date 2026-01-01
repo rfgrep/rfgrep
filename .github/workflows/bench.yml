@@ -41,7 +41,7 @@ jobs:
           sudo apt-get install -y ripgrep fd-find grep
           
       - name: Download previous benchmark database
-        uses: actions/download-artifact@v5
+        uses: actions/download-artifact@v7
         with:
           name: benchmark-database
           path: benchmarks/ 
