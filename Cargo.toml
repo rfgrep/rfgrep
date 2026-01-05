@@ -34,7 +34,7 @@ doc = false
 [dependencies]
 arboard = "3.2"
 is-terminal = "0.4"
-byte-unit = "5.1.6"
+byte-unit = "5.2.0"
 clap = { version = "4.5", features = ["derive"] }
 colored = "3.0.0"
 dialoguer = "0.12"
