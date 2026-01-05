@@ -75,7 +75,7 @@ crossterm = "0.29"
 atty = "0.2"
 rand = { version = "0.9", optional = true }
 tempfile = { version = "3.23", optional = true }
-libloading = "0.8"
+libloading = "0.9"
 
 # Development dependencies
 [dev-dependencies]
