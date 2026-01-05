@@ -50,7 +50,7 @@ serde = { version = "1.0", features = ["derive"] }
 walkdir = "2.3"
 simplelog = "0.12"
 prometheus = "0.14"
-hyper = { version = "1.7", features = ["full"] }
+hyper = { version = "1.8", features = ["full"] }
 memmap2 = "0.9"
 clap_complete = "4.5.60"
 parking_lot = "0.12.5"
