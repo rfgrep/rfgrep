@@ -20,21 +20,19 @@ impl SimdSearch {
         if self.pattern.is_empty() {
             return vec![];
         }
-
+        // Use memchr SIMD, and if possible, AVX2/SSE4 via memmem
         let text_bytes = text.as_bytes();
         let mut matches = Vec::new();
         let mut pos = 0;
-
-        while let Some(found_pos) = memmem::find(&text_bytes[pos..], &self.pattern) {
+        let finder = memmem::Finder::new(&self.pattern);
+        while let Some(found_pos) = finder.find(&text_bytes[pos..]) {
             let absolute_pos = pos + found_pos;
             matches.push(absolute_pos);
             pos = absolute_pos + 1;
-
             if pos >= text_bytes.len() {
                 break;
             }
         }
-
         matches
     }
 
