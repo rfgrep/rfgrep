@@ -17,11 +17,11 @@ use std::time::Instant;
 
 const CONTEXT_LINES: usize = 2;
 const BINARY_CHECK_SIZE: usize = 8000;
-const MMAP_THRESHOLD: u64 = 16 * 1024 * 1024;
+pub const MMAP_THRESHOLD: u64 = 16 * 1024 * 1024;
 const MAX_SCAN_FILE_SIZE: u64 = 100 * 1024 * 1024; // 100 MB
 
 /// Get adaptive mmap threshold based on available system memory
-fn get_adaptive_mmap_threshold() -> u64 {
+pub fn get_adaptive_mmap_threshold() -> u64 {
     #[cfg(unix)]
     {
         use std::fs;
@@ -43,9 +43,23 @@ fn get_adaptive_mmap_threshold() -> u64 {
     MMAP_THRESHOLD
 }
 
+/// Expose adaptive chunk size for streaming
+pub fn get_adaptive_chunk_size(file_size: u64) -> usize {
+    if file_size < 64 * 1024 {
+        4096
+    } else if file_size < 1024 * 1024 {
+        8192
+    } else if file_size < 16 * 1024 * 1024 {
+        65536
+    } else {
+        262144
+    }
+}
+
 use serde::{Deserialize, Serialize};
 
 #[derive(Debug, Clone, PartialEq, Eq, PartialOrd, Ord, Serialize, Deserialize)]
+#[derive(Default)]
 pub struct SearchMatch {
     pub path: std::path::PathBuf,
     pub line_number: usize,
