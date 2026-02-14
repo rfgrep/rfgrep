@@ -1,7 +1,7 @@
 //! Data generation utilities for testing
 //! Provides functions to generate various types of test data
 
-use rand::Rng;
+use rand::RngExt;
 use std::fs;
 use std::path::PathBuf;
 
