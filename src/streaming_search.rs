@@ -44,36 +44,32 @@ pub struct StreamingSearchPipeline {
 }
 
 impl StreamingSearchPipeline {
-        /// Fast-exit search: returns true if any match is found, exits early
-        pub async fn search_file_fast_exit(
-            &self,
-            path: &Path,
-            pattern: &str,
-        ) -> RfgrepResult<bool> {
-            if crate::processor::is_binary(path) {
-                return Ok(false);
-            }
-            use memchr::memmem;
-            use memmap2::Mmap;
-            let file = std::fs::File::open(path).map_err(crate::error::RfgrepError::Io)?;
-            let metadata = file.metadata().map_err(crate::error::RfgrepError::Io)?;
-            let mmap_threshold = crate::processor::get_adaptive_mmap_threshold();
-            let finder = memmem::Finder::new(pattern.as_bytes());
-            if metadata.len() >= mmap_threshold {
-                // Use mmap for large files
-                let mmap = unsafe { Mmap::map(&file).map_err(crate::error::RfgrepError::Io)? };
-                if finder.find(&mmap).is_some() {
-                    return Ok(true);
-                }
-            } else {
-                // Zero-copy: read file into buffer, avoid extra allocations
-                let buf = std::fs::read(path).map_err(crate::error::RfgrepError::Io)?;
-                if finder.find(&buf).is_some() {
-                    return Ok(true);
-                }
-            }
-            Ok(false)
+    /// Fast-exit search: returns true if any match is found, exits early
+    pub async fn search_file_fast_exit(&self, path: &Path, pattern: &str) -> RfgrepResult<bool> {
+        if crate::processor::is_binary(path) {
+            return Ok(false);
         }
+        use memchr::memmem;
+        use memmap2::Mmap;
+        let file = std::fs::File::open(path).map_err(crate::error::RfgrepError::Io)?;
+        let metadata = file.metadata().map_err(crate::error::RfgrepError::Io)?;
+        let mmap_threshold = crate::processor::get_adaptive_mmap_threshold();
+        let finder = memmem::Finder::new(pattern.as_bytes());
+        if metadata.len() >= mmap_threshold {
+            // Use mmap for large files
+            let mmap = unsafe { Mmap::map(&file).map_err(crate::error::RfgrepError::Io)? };
+            if finder.find(&mmap).is_some() {
+                return Ok(true);
+            }
+        } else {
+            // Zero-copy: read file into buffer, avoid extra allocations
+            let buf = std::fs::read(path).map_err(crate::error::RfgrepError::Io)?;
+            if finder.find(&buf).is_some() {
+                return Ok(true);
+            }
+        }
+        Ok(false)
+    }
     pub fn new(config: StreamingConfig) -> Self {
         Self { config }
     }

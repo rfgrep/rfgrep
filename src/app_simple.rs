@@ -453,7 +453,9 @@ impl RfgrepApp {
             let matches: Vec<crate::processor::SearchMatch> = file_refs
                 .par_iter()
                 .filter_map(|file| {
-                    let found = futures::executor::block_on(pipeline.search_file_fast_exit(file, search_pattern));
+                    let found = futures::executor::block_on(
+                        pipeline.search_file_fast_exit(file, search_pattern),
+                    );
                     match found {
                         Ok(true) => Some(crate::processor::SearchMatch {
                             path: file.to_path_buf(),

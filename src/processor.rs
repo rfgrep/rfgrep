@@ -58,8 +58,7 @@ pub fn get_adaptive_chunk_size(file_size: u64) -> usize {
 
 use serde::{Deserialize, Serialize};
 
-#[derive(Debug, Clone, PartialEq, Eq, PartialOrd, Ord, Serialize, Deserialize)]
-#[derive(Default)]
+#[derive(Debug, Clone, PartialEq, Eq, PartialOrd, Ord, Serialize, Deserialize, Default)]
 pub struct SearchMatch {
     pub path: std::path::PathBuf,
     pub line_number: usize,
