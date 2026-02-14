@@ -1,6 +1,6 @@
 [package]
 name = "rfgrep"
-version = "0.4.0"
+version = "0.5.0"
 edition = "2021"
 description = "Advanced recursive file grep utility with comprehensive file type classification - search, list, and analyze 153+ file formats with intelligent filtering and safety policies"
 homepage = "https://github.com/kh3rld/rfgrep"
@@ -32,62 +32,63 @@ path = "src/main.rs"
 doc = false
 
 [dependencies]
+futures = "0.3"
 arboard = "3.2"
 is-terminal = "0.4"
-byte-unit = "5.1.6"
-clap = { version = "4.5", features = ["derive"] }
-colored = "3.0.0"
+byte-unit = "5.2.0"
+clap = { version = "4.5.58", features = ["derive"] }
+colored = "3.1.1"
 dialoguer = "0.12"
-env_logger = "0.11.8"
-indicatif = { version = "0.18", features = ["improved_unicode"] }
+env_logger = "0.11.9"
+indicatif = { version = "0.18.3", features = ["improved_unicode"] }
 lazy_static = "1.4"
-log = "0.4"
+log = "0.4.29"
 num_cpus = "1.16"
 rayon = "1.10"
 crossbeam-channel = "0.5"
-regex = { version = "1.11", features = ["unicode"] }
+regex = { version = "1.12.3", features = ["unicode"] }
 serde = { version = "1.0", features = ["derive"] }
 walkdir = "2.3"
 simplelog = "0.12"
 prometheus = "0.14"
-hyper = { version = "1.7", features = ["full"] }
+hyper = { version = "1.8.1", features = ["full"] }
 memmap2 = "0.9"
-clap_complete = "4.5.60"
+clap_complete = "4.5.66"
 parking_lot = "0.12.5"
-thiserror = "2.0"
+thiserror = "2.0.18"
 infer = "0.19"
-lru = "0.16"
-serde_with = "3.15.1"
+lru = "0.16.3"
+serde_with = "3.16.1"
 dirs = "6.0.0"
 toml = "0.9.4"
-tokio = { version = "1", features = ["rt-multi-thread", "macros", "time"] }
-chrono = "0.4"
-serde_json = "1.0.142"
+tokio = { version = "1.49.0", features = ["rt-multi-thread", "macros", "time"] }
+chrono = "0.4.43"
+serde_json = "1.0.149"
 ignore = "0.4.25"
-nix = { version = "0.30", optional = false }
-libc = "0.2"
-ctrlc = "3.5"
-memchr = "2.7"
+nix = { version = "0.31.1", optional = false }
+libc = "0.2.180"
+ctrlc = "3.5.2"
+memchr = "2.8.0"
 aho-corasick = "1.1"
-serde_yaml = "0.9"
-ratatui = "0.29"
+serde_yaml = "0.9.34-deprecated"
+ratatui = "0.30.0"
 crossterm = "0.29"
 atty = "0.2"
-rand = { version = "0.9", optional = true }
-tempfile = { version = "3.23", optional = true }
-libloading = "0.8"
+rand = { version = "0.10.0", optional = true }
+tempfile = { version = "3.25.0", optional = true }
+libloading = "0.9.0"
 
 # Development dependencies
 [dev-dependencies]
-assert_cmd = "2.0" 
-predicates = "3.1.3" 
-tempfile = "3.23"   
-rand = "0.9"
-criterion = "0.7"
+assert_cmd = "2.1.2" 
+predicates = "3.1.4" 
+tempfile = "3.25.0"   
+rand = "0.10.0"
+criterion = "0.8.2"
 testing_logger = "0.1.1"
-proptest = "1.9"
-quickcheck = "1.0"
-mockall = "0.13"
+proptest = "1.10.0"
+quickcheck = "1.1.0"
+mockall = "0.14.0"
 
 [features]
 bench = ["dep:rand", "dep:tempfile"]
