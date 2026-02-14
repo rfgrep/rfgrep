@@ -1,9 +1,10 @@
 use assert_cmd::Command;
+use cargo::cargo_bin_cmd;
 use predicates::prelude::*;
 
 #[test]
 fn worker_timeout_enforced() {
-    let mut cmd = Command::cargo_bin("rfgrep").unwrap();
+    let mut cmd = cargo_bin_cmd!("rfgrep");
     cmd.env("RFGREP_WORKER_SLEEP", "3");
     cmd.arg("search")
         .arg("pattern")
