@@ -363,6 +363,8 @@ impl RfgrepApp {
                 max_matches,
                 timeout_per_file,
                 threads,
+                files_with_matches,
+                count,
             )
             .await?;
 
@@ -418,6 +420,8 @@ impl RfgrepApp {
         max_matches: Option<usize>,
         timeout_per_file: Option<u64>,
         threads: Option<usize>,
+        files_with_matches: bool,
+        count: bool,
     ) -> RfgrepResult<Vec<crate::processor::SearchMatch>> {
         let config = StreamingConfig {
             algorithm: search_algorithm,
@@ -431,11 +435,36 @@ impl RfgrepApp {
         };
 
         let thread_count = threads.unwrap_or_else(|| num_cpus::get().min(8));
-
         let pipeline = StreamingSearchPipeline::new(config);
         let file_refs: Vec<&Path> = filtered_files.iter().map(|p| p.as_path()).collect();
 
-        if file_refs.len() > 10 {
+        // Dynamic parallel threshold based on mode
+        let parallel_threshold = if files_with_matches {
+            5
+        } else if count {
+            7
+        } else {
+            10
+        };
+
+        // Aggressively parallelize files-with-matches mode
+        if files_with_matches {
+            use rayon::prelude::*;
+            let matches: Vec<crate::processor::SearchMatch> = file_refs
+                .par_iter()
+                .filter_map(|file| {
+                    let found = futures::executor::block_on(pipeline.search_file_fast_exit(file, search_pattern));
+                    match found {
+                        Ok(true) => Some(crate::processor::SearchMatch {
+                            path: file.to_path_buf(),
+                            ..Default::default()
+                        }),
+                        _ => None,
+                    }
+                })
+                .collect();
+            Ok(matches)
+        } else if file_refs.len() > parallel_threshold {
             pipeline
                 .search_files_parallel(&file_refs, search_pattern, thread_count)
                 .await
