@@ -60,7 +60,7 @@ infer = "0.19"
 lru = "0.16.3"
 serde_with = "3.16.1"
 dirs = "6.0.0"
-toml = "0.9.4"
+toml = "0.9.8"
 tokio = { version = "1.49.0", features = ["rt-multi-thread", "macros", "time"] }
 chrono = "0.4.43"
 serde_json = "1.0.149"
@@ -89,6 +89,7 @@ testing_logger = "0.1.1"
 proptest = "1.10.0"
 quickcheck = "1.1.0"
 mockall = "0.14.0"
+cargo = "0.94.0"
 
 [features]
 bench = ["dep:rand", "dep:tempfile"]
