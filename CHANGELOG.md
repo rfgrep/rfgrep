@@ -4,6 +4,22 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+
+## [0.5.0] - 2026-02-14
+
+
+### Added
+- Compatibility with latest Rust and dependency ecosystem (2026).
+- Improved test data generation utilities for more robust testing.
+
+### Changed
+- Updated `libc` dependency to resolve version conflict with `nix`.
+- Updated man page version and release date.
+
+### Fixed
+- Fixed test failures due to missing `rand::RngExt` import.
+- All Clippy and test warnings addressed for release.
+
 ## [0.4.0] - 2025-10-15
 
 ### Added
@@ -265,8 +281,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - Comprehensive documentation
   - Man pages and shell completions
 
-[Unreleased]: https://github.com/kh3rld/rfgrep/compare/v0.4.0...HEAD
 
+[Unreleased]: https://github.com/kh3rld/rfgrep/compare/v0.5.0...HEAD
+
+[0.5.0]: https://github.com/kh3rld/rfgrep/compare/v0.4.0...v0.5.0
 [0.4.0]: https://github.com/kh3rld/rfgrep/compare/v0.3.1...v0.4.0
   [0.3.1]: https://github.com/kh3rld/rfgrep/compare/v0.3.0...v0.3.1
   [0.3.0]: https://github.com/kh3rld/rfgrep/compare/v0.2.1...v0.3.0
