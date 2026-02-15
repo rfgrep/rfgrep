@@ -58,10 +58,12 @@ impl StreamingSearchPipeline {
         let found = if metadata.len() >= mmap_threshold {
             // Use mmap for large files
             let mmap = unsafe { Mmap::map(&file).map_err(crate::error::RfgrepError::Io)? };
+            // skipcq: RS-W1033 - Finder::find() only returns Option<usize>, .is_some() is correct
             finder.find(&mmap).is_some()
         } else {
             // Zero-copy: read file into buffer, avoid extra allocations
             let buf = std::fs::read(path).map_err(crate::error::RfgrepError::Io)?;
+            // skipcq: RS-W1033 - Finder::find() only returns Option<usize>, .is_some() is correct
             finder.find(&buf).is_some()
         };
         Ok(found)
