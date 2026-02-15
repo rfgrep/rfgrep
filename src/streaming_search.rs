@@ -58,15 +58,11 @@ impl StreamingSearchPipeline {
         if metadata.len() >= mmap_threshold {
             // Use mmap for large files
             let mmap = unsafe { Mmap::map(&file).map_err(crate::error::RfgrepError::Io)? };
-            if finder.find(&mmap).is_some() {
-                return Ok(true);
-            }
+            return Ok(finder.find(&mmap).is_some());
         } else {
             // Zero-copy: read file into buffer, avoid extra allocations
             let buf = std::fs::read(path).map_err(crate::error::RfgrepError::Io)?;
-            if finder.find(&buf).is_some() {
-                return Ok(true);
-            }
+            return Ok(finder.find(&buf).is_some());
         }
         Ok(false)
     }
