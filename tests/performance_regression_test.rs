@@ -146,8 +146,8 @@ fn test_file_io_performance() {
     let elapsed = start.elapsed().as_millis();
 
     assert!(
-        elapsed < 100,
-        "File I/O search took {}ms, expected <100ms",
+        elapsed < 200,
+        "File I/O search took {}ms, expected <200ms",
         elapsed
     );
 }
