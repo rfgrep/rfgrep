@@ -55,16 +55,16 @@ impl StreamingSearchPipeline {
         let metadata = file.metadata().map_err(crate::error::RfgrepError::Io)?;
         let mmap_threshold = crate::processor::get_adaptive_mmap_threshold();
         let finder = memmem::Finder::new(pattern.as_bytes());
-        if metadata.len() >= mmap_threshold {
+        let found = if metadata.len() >= mmap_threshold {
             // Use mmap for large files
             let mmap = unsafe { Mmap::map(&file).map_err(crate::error::RfgrepError::Io)? };
-            return Ok(finder.find(&mmap).is_some());
+            finder.find(&mmap).is_some()
         } else {
             // Zero-copy: read file into buffer, avoid extra allocations
             let buf = std::fs::read(path).map_err(crate::error::RfgrepError::Io)?;
-            return Ok(finder.find(&buf).is_some());
-        }
-        Ok(false)
+            finder.find(&buf).is_some()
+        };
+        Ok(found)
     }
     pub fn new(config: StreamingConfig) -> Self {
         Self { config }
