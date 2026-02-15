@@ -89,7 +89,6 @@ testing_logger = "0.1.1"
 proptest = "1.10.0"
 quickcheck = "1.1.0"
 mockall = "0.14.0"
-cargo = "0.94.0"
 
 [features]
 bench = ["dep:rand", "dep:tempfile"]
