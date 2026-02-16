@@ -110,7 +110,7 @@ proptest! {
     #[test]
     fn test_case_sensitivity(lower in "[a-z]{3,8}") {
         let upper = lower.to_uppercase();
-        let text = format!("prefix {} middle {} suffix", lower, upper);
+        let text = format!(">>> {} <<< {} >>>", lower, upper);
 
         let searcher = SimdSearch::new(&lower);
         let results = searcher.search(&text, &lower);
