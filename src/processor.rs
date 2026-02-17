@@ -75,6 +75,11 @@ lazy_static! {
 }
 
 pub fn is_binary(file: &Path) -> bool {
+    // If it's a supported compressed file,... treat it as searchable (non-binary skip)
+    if crate::compression::is_compressed(file) {
+        return false;
+    }
+
     if let Ok(Some(k)) = infer::get_from_path(file) {
         if !k.mime_type().starts_with("text/") {
             debug!(
@@ -242,7 +247,26 @@ pub fn search_file(path: &Path, pattern: &Regex) -> RfgrepResult<Vec<SearchMatch
         return Ok(vec![]);
     }
 
-    let matches_found = if file_size >= get_adaptive_mmap_threshold() {
+    let matches_found = if let Some(compression) =
+        crate::compression::CompressionType::from_extension(path)
+    {
+        debug!("Detected compressed file: {:?} ({:?})", path, compression);
+        match compression {
+            crate::compression::CompressionType::Zip | crate::compression::CompressionType::Tar => {
+                crate::archive::search_archive(path, pattern)?
+            }
+            _ => match crate::compression::open_compressed_stream(path, compression) {
+                Ok(stream) => {
+                    let reader = BufReader::new(stream);
+                    find_matches_streaming(reader, pattern, path)?
+                }
+                Err(e) => {
+                    warn!("Failed to open compressed file {}: {}", file_display, e);
+                    return Ok(vec![]);
+                }
+            },
+        }
+    } else if file_size >= get_adaptive_mmap_threshold() {
         debug!("Attempting memory mapping for file: {file_display} ({file_size} bytes)");
         match unsafe { Mmap::map(&file) } {
             Ok(mmap) => {
@@ -281,7 +305,7 @@ pub fn search_file(path: &Path, pattern: &Regex) -> RfgrepResult<Vec<SearchMatch
     Ok(matches_found)
 }
 
-fn find_matches_with_context(
+pub fn find_matches_with_context(
     content: String,
     pattern: &Regex,
     path: &Path,
@@ -313,7 +337,7 @@ fn find_matches_with_context(
     Ok(matches)
 }
 
-fn find_matches_streaming<R: Read>(
+pub fn find_matches_streaming<R: Read>(
     reader: BufReader<R>,
     pattern: &Regex,
     path: &Path,

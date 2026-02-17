@@ -729,7 +729,7 @@ fn centered_rect(percent_x: u16, percent_y: u16, r: Rect) -> Rect {
 }
 
 pub fn init_terminal() -> RfgrepResult<Terminal<CrosstermBackend<Stdout>>> {
-    if !atty::is(atty::Stream::Stdout) {
+    if !is_terminal::is_terminal(&std::io::stdout()) {
         return Err(crate::error::RfgrepError::Io(std::io::Error::new(
             std::io::ErrorKind::Unsupported,
             "TUI requires an interactive terminal. Please run in a proper terminal environment.",

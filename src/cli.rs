@@ -40,7 +40,7 @@ PERFORMANCE TIPS:
   • Enable --recursive for deep directory traversal
 "#,
     after_help = r#"
-For more information, visit: https://github.com/kh3rld/rfgrep
+For more information, visit: https://github.com/rfgrep/rfgrep
 "#
 )]
 pub struct Cli {
@@ -113,6 +113,13 @@ EXAMPLES:
   rfgrep simulate --path .
 "#)]
     Simulate {},
+
+    /// Configuration management
+    Config {
+        #[clap(subcommand)]
+        action: crate::cli_config::ConfigAction,
+    },
+
     #[clap(after_help = r#"
 SEARCH MODES:
   text    - Plain text search (default)

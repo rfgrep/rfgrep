@@ -124,7 +124,7 @@ fi
 # add note about viewing detailed results
 cat >> "$OUTPUT_FILE" << 'EOF'
 
-> **note:** These benchmarks are run automatically on every push to the main branch,... for detailed results and visualizations, see the [benchmark reports](https://github.com/kh3rld/rfgrep/actions/workflows/bench.yml).
+> **note:** These benchmarks are run automatically on every push to the main branch,... for detailed results and visualizations, see the [benchmark reports](https://github.com/rfgrep/rfgrep/actions/workflows/bench.yml).
 EOF
 
 echo "Benchmark results extracted to $OUTPUT_FILE"

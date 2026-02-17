@@ -6,9 +6,9 @@ description: |
   rfgrep - Recursive file grep utility optimized for safety and production usage.
 
 license: BSD-3-Clause
-website: https://github.com/kh3rld/rfgrep
-source-code: https://github.com/kh3rld/rfgrep
-issues: https://github.com/kh3rld/rfgrep/issues
+website: https://github.com/rfgrep/rfgrep
+source-code: https://github.com/rfgrep/rfgrep
+issues: https://github.com/rfgrep/rfgrep/issues
 
 grade: stable
 confinement: strict

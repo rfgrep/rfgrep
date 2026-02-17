@@ -15,10 +15,10 @@ This guide provides comprehensive instructions for installing rfgrep v0.2.1, inc
 cargo install rfgrep
 
 # From GitHub
-cargo install --git https://github.com/kh3rld/rfgrep.git
+cargo install --git https://github.com/rfgrep/rfgrep.git
 
 # From source
-git clone https://github.com/kh3rld/rfgrep.git
+git clone https://github.com/rfgrep/rfgrep.git
 cd rfgrep
 cargo build --release
 ```
@@ -90,7 +90,7 @@ cargo install rfgrep
 
 **Option B: From Source**
 ```bash
-git clone https://github.com/kh3rld/rfgrep.git
+git clone https://github.com/rfgrep/rfgrep.git
 cd rfgrep
 cargo build --release
 ```
@@ -360,6 +360,6 @@ cargo fmt --all -- --check
 
 - **Documentation**: `man rfgrep`
 - **Help**: `rfgrep --help`
-- **Issues**: https://github.com/kh3rld/rfgrep/issues
-- **Source**: https://github.com/kh3rld/rfgrep
-- **Releases**: https://github.com/kh3rld/rfgrep/releases 
+- **Issues**: https://github.com/rfgrep/rfgrep/issues
+- **Source**: https://github.com/rfgrep/rfgrep
+- **Releases**: https://github.com/rfgrep/rfgrep/releases 

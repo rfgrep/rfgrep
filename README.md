@@ -4,10 +4,10 @@ A command-line utility for recursively searching and listing files with advanced
 
 [<img alt="crates.io" src="https://img.shields.io/crates/v/rfgrep.svg?style=for-the-badge&color=fc8d62&logo=rust" height="20">](https://crates.io/crates/rfgrep)
 [<img alt="docs.rs" src="https://img.shields.io/badge/docs.rs-rfgrep-66c2a5?style=for-the-badge&labelColor=555555&logo=docs.rs" height="20">](https://docs.rs/rfgrep)
-[![CI](https://github.com/kh3rld/rfgrep/actions/workflows/ci.yml/badge.svg)](https://github.com/kh3rld/rfgrep/actions/workflows/ci.yml)
-[![License](https://img.shields.io/github/license/kh3rld/rfgrep)](https://github.com/kh3rld/rfgrep/blob/main/LICENSE)
+[![CI](https://github.com/rfgrep/rfgrep/actions/workflows/ci.yml/badge.svg)](https://github.com/rfgrep/rfgrep/actions/workflows/ci.yml)
+[![License](https://img.shields.io/github/license/rfgrep/rfgrep)](https://github.com/rfgrep/rfgrep/blob/main/LICENSE)
 
-[![DeepSource](https://app.deepsource.com/gh/kh3rld/rfgrep.svg/?label=active+issues&show_trend=true)](https://app.deepsource.com/gh/kh3rld/rfgrep/)
+[![DeepSource](https://app.deepsource.com/gh/rfgrep/rfgrep.svg/?label=active+issues&show_trend=true)](https://app.deepsource.com/gh/rfgrep/rfgrep/)
 
 
 [![Get it from the Snap Store](https://snapcraft.io/en/dark/install.svg)](https://snapcraft.io/rfgrep)
@@ -67,13 +67,13 @@ cargo install rfgrep
 
 ### From GitHub
 ```bash
-cargo install --git https://github.com/kh3rld/rfgrep.git
+cargo install --git https://github.com/rfgrep/rfgrep.git
 ```
 
 ### From Source
 
 ```bash
-git clone https://github.com/kh3rld/rfgrep.git
+git clone https://github.com/rfgrep/rfgrep.git
 cargo build --release
 ```
 

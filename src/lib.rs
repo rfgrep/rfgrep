@@ -91,12 +91,19 @@ pub mod app_simple;
 
 /// Application submodules (stdin, filters, handlers, etc.)
 pub mod app;
+pub mod archive;
 
 /// Command-line interface definitions and argument parsing
 pub mod cli;
 
 /// Internal configuration management
 mod config;
+
+/// CLI configuration module
+pub mod cli_config;
+
+/// Compression support
+pub mod compression;
 
 /// Error types and result handling
 pub mod error;
@@ -149,6 +156,9 @@ mod search;
 
 /// Multiple search algorithms (SIMD, Boyer-Moore, Regex, Simple)
 pub mod search_algorithms;
+
+/// SIMD-optimized search engine implementation
+pub mod simd;
 
 /// Streaming search pipeline for large files
 pub mod streaming_search;
