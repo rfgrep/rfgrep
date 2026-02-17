@@ -14,7 +14,10 @@
 #![allow(clippy::print_literal)]
 mod app;
 mod app_simple;
+mod archive;
 mod cli;
+mod cli_config;
+mod compression;
 mod config;
 mod error;
 mod file_types;
@@ -24,6 +27,7 @@ mod plugin_cli;
 mod plugin_system;
 mod processor;
 mod search_algorithms;
+mod simd;
 mod streaming_search;
 mod tui;
 mod walker;
