@@ -85,8 +85,41 @@ impl StreamingSearchPipeline {
 
         // Helper future that performs the actual search
         let do_search = async {
-            let file = File::open(path).map_err(RfgrepError::Io)?;
-            let reader = BufReader::with_capacity(self.config.buffer_size, file);
+            if let Some(
+                crate::compression::CompressionType::Zip | crate::compression::CompressionType::Tar,
+            ) = crate::compression::CompressionType::from_extension(path)
+            {
+                let pat_str = if !self.config.case_sensitive {
+                    format!("(?i){}", pattern)
+                } else {
+                    pattern.to_string()
+                };
+                let regex = crate::processor::get_or_compile_regex(&pat_str)?;
+                let matches = crate::archive::search_archive(path, &regex)?;
+
+                // Archive matching uses processor::SearchMatch directly.
+                // Post-processing (invert match) is skipped as find_matches_streaming only returns positive matches.
+                let mut final_matches = matches;
+
+                if let Some(max_matches) = self.config.max_matches {
+                    if final_matches.len() > max_matches {
+                        final_matches.truncate(max_matches);
+                    }
+                }
+                return RfgrepResult::Ok(final_matches);
+            }
+
+            let reader: Box<dyn Read + Send> = if let Some(compression) =
+                crate::compression::CompressionType::from_extension(path)
+            {
+                crate::compression::open_compressed_stream(path, compression)
+                    .map_err(RfgrepError::Io)?
+            } else {
+                let file = File::open(path).map_err(RfgrepError::Io)?;
+                Box::new(file)
+            };
+
+            let reader = BufReader::with_capacity(self.config.buffer_size, reader);
 
             // Create search algorithm instance
             let search_algo = self.create_search_algorithm(pattern)?;
