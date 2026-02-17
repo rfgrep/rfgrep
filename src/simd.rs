@@ -166,7 +166,10 @@ impl SimdBackend for Sse42Backend {
     }
 }
 
-#[cfg(all(any(target_arch = "x86", target_arch = "x86_64"), target_feature = "avx512f"))]
+#[cfg(all(
+    any(target_arch = "x86", target_arch = "x86_64"),
+    target_feature = "avx512f"
+))]
 /// AVX-512 implementation using 512-bit registers
 pub struct Avx512Backend {
     pattern: Vec<u8>,
@@ -174,7 +177,10 @@ pub struct Avx512Backend {
     last_byte: u8,
 }
 
-#[cfg(all(any(target_arch = "x86", target_arch = "x86_64"), target_feature = "avx512f"))]
+#[cfg(all(
+    any(target_arch = "x86", target_arch = "x86_64"),
+    target_feature = "avx512f"
+))]
 impl Avx512Backend {
     pub fn new(pattern: &[u8]) -> Self {
         Self {
@@ -185,7 +191,10 @@ impl Avx512Backend {
     }
 }
 
-#[cfg(all(any(target_arch = "x86", target_arch = "x86_64"), target_feature = "avx512f"))]
+#[cfg(all(
+    any(target_arch = "x86", target_arch = "x86_64"),
+    target_feature = "avx512f"
+))]
 impl SimdBackend for Avx512Backend {
     fn search(&self, text: &[u8]) -> Vec<usize> {
         let mut matches = Vec::new();
