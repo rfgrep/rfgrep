@@ -264,8 +264,13 @@ impl SimdBackend for FallbackBackend {
             return matches;
         }
 
-        for i in 0..text.len().saturating_sub(self.pattern.len()) + 1 {
-            if &text[i..i + self.pattern.len()] == self.pattern.as_slice() {
+        let pat_len = self.pattern.len();
+        let text_len = text.len();
+        if text_len < pat_len {
+            return matches;
+        }
+        for i in 0..=text_len - pat_len {
+            if &text[i..i + pat_len] == self.pattern.as_slice() {
                 matches.push(i);
             }
         }
