@@ -11,7 +11,7 @@ use crate::processor::search_file;
 use crate::search_algorithms::SearchAlgorithm;
 use crate::streaming_search::{StreamingConfig, StreamingSearchPipeline};
 use crate::tui::{init_terminal, restore_terminal, TuiApp};
-use crate::walker::walk_dir;
+use crate::walker::{walk_dir_with_options, WalkerOptions};
 use colored::Colorize;
 use std::path::Path;
 use std::sync::Arc;
@@ -272,6 +272,9 @@ impl RfgrepApp {
                 )
                 .await
             }
+            Commands::Config { action } => {
+                crate::cli_config::handle_config_action(action.clone()).await
+            }
         }
     }
 
@@ -332,7 +335,23 @@ impl RfgrepApp {
             return stdin_searcher.search(options).await;
         }
 
-        let files = self.collect_files(search_path, recursive);
+        // Load config
+        let config = crate::config::Config::load().unwrap_or_default();
+
+        let walker_options = WalkerOptions {
+            recursive,
+            show_hidden: search_all_files,
+            respect_gitignore: config.git.respect_gitignore && !search_all_files,
+            respect_global_gitignore: config.git.respect_global_gitignore && !search_all_files,
+            respect_git_exclude: config.git.respect_git_exclude && !search_all_files,
+            search_dot_git: config.git.search_dot_git,
+            ignore_hidden: !search_all_files,
+            max_depth: if recursive { None } else { Some(1) },
+            follow_links: config.git.submodules.follow,
+            overrides: Vec::new(),
+        };
+
+        let files = self.collect_files(search_path, walker_options);
 
         // Use the FileFilter module for filtering
         let filter_options = FileFilterOptions {
@@ -399,8 +418,8 @@ impl RfgrepApp {
     }
 
     /// Collect files from directory
-    fn collect_files(&self, search_path: &Path, recursive: bool) -> Vec<std::path::PathBuf> {
-        let entries: Vec<_> = walk_dir(search_path, recursive, true).collect();
+    fn collect_files(&self, search_path: &Path, options: WalkerOptions) -> Vec<std::path::PathBuf> {
+        let entries: Vec<_> = walk_dir_with_options(search_path, options).collect();
         entries
             .into_iter()
             .filter(|entry| entry.path().is_file())
@@ -678,7 +697,21 @@ impl RfgrepApp {
             } else {
                 search_root
             };
-            let entries: Vec<_> = walk_dir(&search_root, true, false).collect();
+            let config = crate::config::Config::load().unwrap_or_default();
+            let walker_options = WalkerOptions {
+                recursive: true,
+                show_hidden: false, // Default for TUI search unless we add a toggle
+                respect_gitignore: config.git.respect_gitignore,
+                respect_global_gitignore: config.git.respect_global_gitignore,
+                respect_git_exclude: config.git.respect_git_exclude,
+                search_dot_git: config.git.search_dot_git,
+                ignore_hidden: true,
+                max_depth: None,
+                follow_links: config.git.submodules.follow,
+                overrides: Vec::new(),
+            };
+
+            let entries: Vec<_> = walk_dir_with_options(&search_root, walker_options).collect();
             for entry in entries {
                 let path = entry.path();
                 if path.is_file() {
@@ -717,9 +750,29 @@ impl RfgrepApp {
         cmd_path_flag: Option<&Path>,
         default_path: &Path,
     ) -> RfgrepResult<()> {
+        use crate::walker::{walk_dir_with_options, WalkerOptions};
         let search_path = cmd_path_flag.or(cmd_path).unwrap_or(default_path);
 
-        let entries: Vec<_> = walk_dir(search_path, recursive, show_hidden).collect();
+        // Load config
+        let config = crate::config::Config::load().unwrap_or_default();
+
+        // Show hidden defaults to respecting gitignore unless show_hidden is explicitly true
+        // But logic in walker.rs is: respect_gitignore defaults to !show_hidden
+        // Here we override with config but still respect show_hidden implication if user wants to see hidden things
+        let walker_options = WalkerOptions {
+            recursive,
+            show_hidden,
+            respect_gitignore: config.git.respect_gitignore && !show_hidden,
+            respect_global_gitignore: config.git.respect_global_gitignore && !show_hidden,
+            respect_git_exclude: config.git.respect_git_exclude && !show_hidden,
+            search_dot_git: config.git.search_dot_git,
+            ignore_hidden: !show_hidden,
+            max_depth: if recursive { None } else { Some(1) },
+            follow_links: config.git.submodules.follow,
+            overrides: Vec::new(),
+        };
+
+        let entries: Vec<_> = walk_dir_with_options(search_path, walker_options).collect();
         let mut files: Vec<_> = entries
             .into_iter()
             .filter(|entry| entry.path().is_file())
