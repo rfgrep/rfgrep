@@ -1,4 +1,6 @@
 #![allow(dead_code)]
+
+#[cfg(any(target_arch = "x86", target_arch = "x86_64"))]
 use std::arch::x86_64::*;
 
 /// Interface for SIMD search backends
@@ -7,6 +9,7 @@ pub trait SimdBackend: Send + Sync {
     fn search(&self, text: &[u8]) -> Vec<usize>;
 }
 
+#[cfg(any(target_arch = "x86", target_arch = "x86_64"))]
 /// AVX2 implementation using 256-bit registers
 pub struct Avx2Backend {
     pattern: Vec<u8>,
@@ -14,6 +17,7 @@ pub struct Avx2Backend {
     last_byte: u8,
 }
 
+#[cfg(any(target_arch = "x86", target_arch = "x86_64"))]
 impl Avx2Backend {
     pub fn new(pattern: &[u8]) -> Self {
         Self {
@@ -24,6 +28,7 @@ impl Avx2Backend {
     }
 }
 
+#[cfg(any(target_arch = "x86", target_arch = "x86_64"))]
 impl SimdBackend for Avx2Backend {
     fn search(&self, text: &[u8]) -> Vec<usize> {
         let mut matches = Vec::new();
@@ -90,12 +95,14 @@ impl SimdBackend for Avx2Backend {
     }
 }
 
+#[cfg(any(target_arch = "x86", target_arch = "x86_64"))]
 /// SSE4.2 implementation using 128-bit registers
 pub struct Sse42Backend {
     pattern: Vec<u8>,
     first_byte: u8,
 }
 
+#[cfg(any(target_arch = "x86", target_arch = "x86_64"))]
 impl Sse42Backend {
     pub fn new(pattern: &[u8]) -> Self {
         Self {
@@ -105,6 +112,7 @@ impl Sse42Backend {
     }
 }
 
+#[cfg(any(target_arch = "x86", target_arch = "x86_64"))]
 impl SimdBackend for Sse42Backend {
     fn search(&self, text: &[u8]) -> Vec<usize> {
         let mut matches = Vec::new();
@@ -158,15 +166,15 @@ impl SimdBackend for Sse42Backend {
     }
 }
 
+#[cfg(all(any(target_arch = "x86", target_arch = "x86_64"), target_feature = "avx512f"))]
 /// AVX-512 implementation using 512-bit registers
-#[cfg(target_feature = "avx512f")]
 pub struct Avx512Backend {
     pattern: Vec<u8>,
     first_byte: u8,
     last_byte: u8,
 }
 
-#[cfg(target_feature = "avx512f")]
+#[cfg(all(any(target_arch = "x86", target_arch = "x86_64"), target_feature = "avx512f"))]
 impl Avx512Backend {
     pub fn new(pattern: &[u8]) -> Self {
         Self {
@@ -177,7 +185,7 @@ impl Avx512Backend {
     }
 }
 
-#[cfg(target_feature = "avx512f")]
+#[cfg(all(any(target_arch = "x86", target_arch = "x86_64"), target_feature = "avx512f"))]
 impl SimdBackend for Avx512Backend {
     fn search(&self, text: &[u8]) -> Vec<usize> {
         let mut matches = Vec::new();
@@ -264,26 +272,28 @@ pub struct SimdSearchEngine {
 impl SimdSearchEngine {
     pub fn new(pattern: &str) -> Self {
         let bytes = pattern.as_bytes();
-        #[cfg(target_feature = "avx512f")]
+        #[cfg(any(target_arch = "x86", target_arch = "x86_64"))]
         {
-            if is_x86_feature_detected!("avx512f") && !bytes.is_empty() {
+            #[cfg(target_feature = "avx512f")]
+            {
+                if is_x86_feature_detected!("avx512f") && !bytes.is_empty() {
+                    return Self {
+                        backend: Box::new(Avx512Backend::new(bytes)),
+                    };
+                }
+            }
+            if is_x86_feature_detected!("avx2") && !bytes.is_empty() {
                 return Self {
-                    backend: Box::new(Avx512Backend::new(bytes)),
+                    backend: Box::new(Avx2Backend::new(bytes)),
+                };
+            } else if is_x86_feature_detected!("sse4.2") && !bytes.is_empty() {
+                return Self {
+                    backend: Box::new(Sse42Backend::new(bytes)),
                 };
             }
         }
-        if is_x86_feature_detected!("avx2") && !bytes.is_empty() {
-            Self {
-                backend: Box::new(Avx2Backend::new(bytes)),
-            }
-        } else if is_x86_feature_detected!("sse4.2") && !bytes.is_empty() {
-            Self {
-                backend: Box::new(Sse42Backend::new(bytes)),
-            }
-        } else {
-            Self {
-                backend: Box::new(FallbackBackend::new(bytes)),
-            }
+        Self {
+            backend: Box::new(FallbackBackend::new(bytes)),
         }
     }
 
