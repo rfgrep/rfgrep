@@ -1,8 +1,8 @@
-use memchr::memmem;
 use std::collections::HashMap;
 
-/// SIMD-optimized string search using memchr
+/// SIMD-optimized string search using CPU-specific intrinsics (AVX2/SSE4.2)
 pub struct SimdSearch {
+    engine: crate::simd::SimdSearchEngine,
     pattern: Vec<u8>,
     pattern_str: String,
 }
@@ -10,30 +10,15 @@ pub struct SimdSearch {
 impl SimdSearch {
     pub fn new(pattern: &str) -> Self {
         Self {
+            engine: crate::simd::SimdSearchEngine::new(pattern),
             pattern: pattern.as_bytes().to_vec(),
             pattern_str: pattern.to_string(),
         }
     }
 
-    /// Ultra-fast SIMD search using memchr
+    /// Ultra-fast SIMD search using hardware acceleration
     pub fn search(&self, text: &str, _pattern: &str) -> Vec<usize> {
-        if self.pattern.is_empty() {
-            return vec![];
-        }
-        // Use memchr SIMD, and if possible, AVX2/SSE4 via memmem
-        let text_bytes = text.as_bytes();
-        let mut matches = Vec::new();
-        let mut pos = 0;
-        let finder = memmem::Finder::new(&self.pattern);
-        while let Some(found_pos) = finder.find(&text_bytes[pos..]) {
-            let absolute_pos = pos + found_pos;
-            matches.push(absolute_pos);
-            pos = absolute_pos + 1;
-            if pos >= text_bytes.len() {
-                break;
-            }
-        }
-        matches
+        self.engine.search(text)
     }
 
     /// Search with context lines
