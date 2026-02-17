@@ -65,7 +65,12 @@ proptest! {
         for (i, part) in parts.iter().enumerate() {
             text.push_str(part);
             if i < count {
+                // Use a space as a separator to prevent accidental pattern matches
+                // that overlap with the filler text (e.g., filler0ifi where 'ifi'
+                // might overlap with 'r0i').
+                text.push(' ');
                 text.push_str(&pattern);
+                text.push(' ');
             }
         }
 
