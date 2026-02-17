@@ -120,6 +120,9 @@ jobs:
     name: Build Artifacts
     runs-on: ${{ matrix.os }}
     needs: [lint, test, security]
+    permissions:
+      actions: write
+      contents: read
     strategy:
       matrix:
         include:
