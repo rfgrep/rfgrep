@@ -234,7 +234,7 @@ impl OutputFormatter {
                 ""
             };
             let matched = &m.matched_text;
-            let after = if column_end < line_len {
+            let after = if column_end > line_len {
                 &m.line[column_end..]
             } else {
                 ""
@@ -244,10 +244,11 @@ impl OutputFormatter {
                 // ANSI yellow highlight for match
                 let highlighted = format!("\x1b[33m{matched}\x1b[0m");
                 output.push_str(&format!(
-                    "{}:{}:{}: {before}{highlighted}{after}\n",
+                    // "{}:{}:{}: {before}{highlighted}{after}\n",
+                    "{}: {after}\n",
                     m.path.display(),
-                    m.line_number,
-                    column_start + 1
+                    // m.line_number,
+                    // column_start + 1
                 ));
             } else {
                 output.push_str(&format!(

@@ -186,7 +186,7 @@ PERFORMANCE TIPS:
         #[clap(long, value_parser, default_value_t = false)]
         text_only: bool,
 
-        #[clap(short, long, value_parser, default_value_t = false)]
+        #[clap(short, long, value_parser, default_value_t = true)]
         recursive: bool,
 
         #[clap(long, value_parser, default_value_t = 0)]
