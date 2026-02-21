@@ -3,10 +3,10 @@ name = "rfgrep"
 version = "0.5.0"
 edition = "2021"
 description = "Advanced recursive file grep utility with comprehensive file type classification - search, list, and analyze 153+ file formats with intelligent filtering and safety policies"
-homepage = "https://github.com/kh3rld/rfgrep"
+homepage = "https://github.com/rfgrep/rfgrep"
 license = "BSD-3-Clause" 
 authors = ["Khalid Hussein <kherld.hussein@gmail.com>"]
-repository = "https://github.com/kh3rld/rfgrep"
+repository = "https://github.com/rfgrep/rfgrep"
 documentation = "https://docs.rs/rfgrep"
 readme = "README.md"
 keywords = [
@@ -24,7 +24,7 @@ categories = [
 
 [badges]
 maintenance = { status = "actively-developed" }
-github = { repository = "kh3rld/rfgrep", workflow = "CI" }
+github = { repository = "rfgrep/rfgrep", workflow = "CI" }
 
 [[bin]]
 name = "rfgrep"
@@ -73,10 +73,18 @@ aho-corasick = "1.1"
 serde_yaml = "0.9.34-deprecated"
 ratatui = "0.30.0"
 crossterm = "0.29"
-atty = "0.2"
 rand = { version = "0.10.0", optional = true }
 tempfile = { version = "3.25.0", optional = true }
 libloading = "0.9.0"
+glob = "0.3.3"
+dashmap = "6.1.0"
+flate2 = "1.1.9"
+bzip2 = "0.6.1"
+xz2 = "0.1.7"
+zstd = "0.13.3"
+lz4_flex = "0.12.0"
+zip = "8.0.0"
+tar = "0.4.44"
 
 # Development dependencies
 [dev-dependencies]

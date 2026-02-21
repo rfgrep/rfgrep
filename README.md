@@ -4,10 +4,10 @@ A command-line utility for recursively searching and listing files with advanced
 
 [<img alt="crates.io" src="https://img.shields.io/crates/v/rfgrep.svg?style=for-the-badge&color=fc8d62&logo=rust" height="20">](https://crates.io/crates/rfgrep)
 [<img alt="docs.rs" src="https://img.shields.io/badge/docs.rs-rfgrep-66c2a5?style=for-the-badge&labelColor=555555&logo=docs.rs" height="20">](https://docs.rs/rfgrep)
-[![CI](https://github.com/kh3rld/rfgrep/actions/workflows/ci.yml/badge.svg)](https://github.com/kh3rld/rfgrep/actions/workflows/ci.yml)
-[![License](https://img.shields.io/github/license/kh3rld/rfgrep)](https://github.com/kh3rld/rfgrep/blob/main/LICENSE)
+[![CI](https://github.com/rfgrep/rfgrep/actions/workflows/ci.yml/badge.svg)](https://github.com/rfgrep/rfgrep/actions/workflows/ci.yml)
+[![License](https://img.shields.io/github/license/rfgrep/rfgrep)](https://github.com/rfgrep/rfgrep/blob/main/LICENSE)
 
-[![DeepSource](https://app.deepsource.com/gh/kh3rld/rfgrep.svg/?label=active+issues&show_trend=true)](https://app.deepsource.com/gh/kh3rld/rfgrep/)
+[![DeepSource](https://app.deepsource.com/gh/rfgrep/rfgrep.svg/?label=active+issues&show_trend=true)](https://app.deepsource.com/gh/rfgrep/rfgrep/)
 
 
 [![Get it from the Snap Store](https://snapcraft.io/en/dark/install.svg)](https://snapcraft.io/rfgrep)
@@ -40,7 +40,7 @@ A command-line utility for recursively searching and listing files with advanced
   - Count-only mode (`-c`)
   - Files-with-matches mode (`-l`)
 
-- **Output Formats** (v0.4.0)
+- **Output Formats** (v0.5.0)
   - CSV export for spreadsheet analysis
   - TSV export for tab-separated data
   - JSON, XML, HTML, Markdown formats
@@ -67,13 +67,13 @@ cargo install rfgrep
 
 ### From GitHub
 ```bash
-cargo install --git https://github.com/kh3rld/rfgrep.git
+cargo install --git https://github.com/rfgrep/rfgrep.git
 ```
 
 ### From Source
 
 ```bash
-git clone https://github.com/kh3rld/rfgrep.git
+git clone https://github.com/rfgrep/rfgrep.git
 cargo build --release
 ```
 
@@ -298,11 +298,11 @@ rfgrep completions fish > ~/.config/fish/completions/rfgrep.fish
 | `--skip-binary`              | Skip binary files                                                  |
 | `--dry-run`                  | Preview files without processing                                   |
 | `--copy`                     | Copy results to clipboard                                          |
-| `--quiet`, `-q`              | Suppress non-essential output (v0.4.0)                             |
-| `--count`, `-c`              | Show only count of matches (v0.4.0)                                |
-| `--files-with-matches`, `-l` | Show only filenames with matches (v0.4.0)                          |
+| `--quiet`, `-q`              | Suppress non-essential output (v0.5.0)                             |
+| `--count`, `-c`              | Show only count of matches (v0.5.0)                                |
+| `--files-with-matches`, `-l` | Show only filenames with matches (v0.5.0)                          |
 | `--output-format`            | Output format: text/json/csv/tsv/xml/html/markdown                 |
-| `--ndjson`                   | Output newline-delimited JSON (v0.4.0)                             |
+| `--ndjson`                   | Output newline-delimited JSON (v0.5.0)                             |
 | `--safety-policy`            | Safety policy: default/conservative/performance                    |
 | `--threads N`                | Number of threads for parallel processing                          |
 | `--file-types`               | File type strategy: default/comprehensive/conservative/performance |
@@ -436,10 +436,10 @@ rfgrep search "pattern" --output-format json
 # NDJSON (newline-delimited JSON) for streaming
 rfgrep search "pattern" --ndjson
 
-# CSV output for spreadsheet analysis (v0.4.0)
+# CSV output for spreadsheet analysis (v0.5.0)
 rfgrep search "pattern" --output-format csv
 
-# TSV output for tab-separated data (v0.4.0)
+# TSV output for tab-separated data (v0.5.0)
 rfgrep search "pattern" --output-format tsv
 
 # XML output for structured data
