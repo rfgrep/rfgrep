@@ -520,7 +520,7 @@ impl RfgrepApp {
         } else if count {
             println!("{}", all_matches.len());
         } else if files_with_matches {
-            // self.output_files_with_matches(all_matches)
+            self.output_files_with_matches(all_matches)
         } else {
             self.output_matches(
                 all_matches,
@@ -560,9 +560,6 @@ impl RfgrepApp {
         }
         let mut files: Vec<_> = unique_files.into_iter().collect();
         files.sort();
-        // for file in files {
-        //     print!("{}", file);
-        // }
     }
 
     /// Output the actual matches

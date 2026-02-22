@@ -223,18 +223,20 @@ impl OutputFormatter {
             output.push_str(&format!("Total matches: {}\n\n", matches.len()));
         }
 
+        if matches.is_empty() {
+            return output;
+        }
         // default one-line-per-match: path:line:col: line-with-highlight
         let mut path: &PathBuf = &matches[0].path;
         output.push_str(&format!("\x1b[38;2;40;172;201m{}\x1b[0m", path.display()));
         output.push_str("\n");
         for m in matches {
-            // path = &m.path;
             let ind_match: Vec<usize> =
                 ::memchr::memmem::find_iter(&m.matched_text.as_bytes(), query.as_bytes()).collect();
             let match_indices = ind_match.as_slice();
             let line_len = m.line.len();
-            let column_start = m.column_start;
-            let column_end = m.column_end;
+            let column_start = m.column_start.min(line_len);
+            let column_end = m.column_end.min(line_len);
             let before = if column_start < line_len {
                 &m.line[..column_start]
             } else {
@@ -247,7 +249,6 @@ impl OutputFormatter {
                 ""
             };
 
-            // This ordering will not work for multiple instances of highlighting in the same line
             if self.use_color {
                 // ANSI yellow highlight for match
                 let highlighted = highlight(matched.as_str(), match_indices, word_len);
@@ -548,11 +549,6 @@ fn escape_html(s: &str) -> String {
         .replace("'", "&#39;")
 }
 
-// fn find_match_indices(pattern: &[u8], matched_text: &[u8]) -> Vec<usize> {
-//     let iterator: Vec<_> = ::memchr::memmem::find_iter(matched_text, pattern).collect();
-//     iterator
-// }
-
 fn highlight(text: &str, starts: &[usize], word_len: usize) -> String {
     let mut result = String::new();
     let mut last = 0;
@@ -560,7 +556,6 @@ fn highlight(text: &str, starts: &[usize], word_len: usize) -> String {
         // push text before match -- This is not bound to always run but it is important
         result.push_str(&text[last..start]);
         let highlighted = &text[start..start + word_len];
-        // result.push_str(format!("\x1b[33m{highlighted}\x1b[0m").as_str());
         result.push_str(format!("\x1b[38;2;194;93;21m{highlighted}\x1b[0m").as_str());
         last = start + word_len;
     }
