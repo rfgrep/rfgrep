@@ -223,15 +223,9 @@ impl OutputFormatter {
             output.push_str(&format!("Total matches: {}\n\n", matches.len()));
         }
 
-        // Changes being introduced reuse the memchr method find
-        // to iterate through matched text in order to ease the highlighting process
-
-        // [Note:] Currently there is no way to handle highlighting of multiple instances of a search pattern found
-        // within a matched text.
-
         // default one-line-per-match: path:line:col: line-with-highlight
         let mut path: &PathBuf = &matches[0].path;
-        output.push_str(&format!("{}", path.display()));
+        output.push_str(&format!("\x1b[38;2;40;172;201m{}\x1b[0m", path.display()));
         output.push_str("\n");
         for m in matches {
             // path = &m.path;
@@ -258,13 +252,19 @@ impl OutputFormatter {
                 // ANSI yellow highlight for match
                 let highlighted = highlight(matched.as_str(), match_indices, word_len);
                 if path == &m.path {
-                    output.push_str(&format!("{}: {before}{highlighted}\n", m.line_number,));
+                    output.push_str(&format!(
+                        "\x1b[38;2;167;29;222m{}\x1b[0m: {before}{highlighted}\n",
+                        m.line_number,
+                    ));
                 } else {
                     path = &m.path;
                     output.push_str("\n");
-                    output.push_str(&format!("{}", path.display()));
+                    output.push_str(&format!("\x1b[38;2;40;172;201m{}\x1b[0m", path.display()));
                     output.push_str("\n");
-                    output.push_str(&format!("{}: {before}{highlighted}\n", m.line_number,));
+                    output.push_str(&format!(
+                        "\x1b[38;2;167;29;222m{}\x1b[0m: {before}{highlighted}\n",
+                        m.line_number,
+                    ));
                 }
             } else {
                 output.push_str(&format!(
@@ -560,7 +560,8 @@ fn highlight(text: &str, starts: &[usize], word_len: usize) -> String {
         // push text before match -- This is not bound to always run but it is important
         result.push_str(&text[last..start]);
         let highlighted = &text[start..start + word_len];
-        result.push_str(format!("\x1b[33m{highlighted}\x1b[0m").as_str());
+        // result.push_str(format!("\x1b[33m{highlighted}\x1b[0m").as_str());
+        result.push_str(format!("\x1b[38;2;194;93;21m{highlighted}\x1b[0m").as_str());
         last = start + word_len;
     }
     // push remaining tail
