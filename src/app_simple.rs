@@ -560,9 +560,6 @@ impl RfgrepApp {
         }
         let mut files: Vec<_> = unique_files.into_iter().collect();
         files.sort();
-        for file in files {
-            println!("{}", file);
-        }
     }
 
     /// Output the actual matches

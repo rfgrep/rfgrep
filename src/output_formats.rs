@@ -1,6 +1,6 @@
 use crate::processor::SearchMatch;
 use serde_json::{json, Value};
-use std::path::Path;
+use std::path::{Path, PathBuf};
 
 /// Output format types
 #[derive(Debug, Clone)]
@@ -215,6 +215,7 @@ impl OutputFormatter {
     #[allow(dead_code)]
     fn format_text(&self, matches: &[SearchMatch], query: &str, path: &Path) -> String {
         let mut output = String::new();
+        let word_len = query.len();
         // metadata header
         if self.include_metadata {
             output.push_str(&format!("Query: {query}\n"));
@@ -222,12 +223,20 @@ impl OutputFormatter {
             output.push_str(&format!("Total matches: {}\n\n", matches.len()));
         }
 
+        if matches.is_empty() {
+            return output;
+        }
         // default one-line-per-match: path:line:col: line-with-highlight
+        let mut path: &PathBuf = &matches[0].path;
+        output.push_str(&format!("\x1b[38;2;40;172;201m{}\x1b[0m", path.display()));
+        output.push('\n');
         for m in matches {
+            let ind_match: Vec<usize> =
+                ::memchr::memmem::find_iter(m.matched_text.as_bytes(), query.as_bytes()).collect();
+            let match_indices = ind_match.as_slice();
             let line_len = m.line.len();
             let column_start = m.column_start.min(line_len);
             let column_end = m.column_end.min(line_len);
-
             let before = if column_start < line_len {
                 &m.line[..column_start]
             } else {
@@ -242,13 +251,22 @@ impl OutputFormatter {
 
             if self.use_color {
                 // ANSI yellow highlight for match
-                let highlighted = format!("\x1b[33m{matched}\x1b[0m");
-                output.push_str(&format!(
-                    "{}:{}:{}: {before}{highlighted}{after}\n",
-                    m.path.display(),
-                    m.line_number,
-                    column_start + 1
-                ));
+                let highlighted = highlight(matched.as_str(), match_indices, word_len);
+                if path == &m.path {
+                    output.push_str(&format!(
+                        "\x1b[38;2;167;29;222m{}\x1b[0m: {before}{highlighted}\n",
+                        m.line_number,
+                    ));
+                } else {
+                    path = &m.path;
+                    output.push('\n');
+                    output.push_str(&format!("\x1b[38;2;40;172;201m{}\x1b[0m", path.display()));
+                    output.push('\n');
+                    output.push_str(&format!(
+                        "\x1b[38;2;167;29;222m{}\x1b[0m: {before}{highlighted}\n",
+                        m.line_number,
+                    ));
+                }
             } else {
                 output.push_str(&format!(
                     "{}:{}:{}: {before}{matched}{after}\n",
@@ -529,4 +547,19 @@ fn escape_html(s: &str) -> String {
         .replace(">", "&gt;")
         .replace("\"", "&quot;")
         .replace("'", "&#39;")
+}
+
+fn highlight(text: &str, starts: &[usize], word_len: usize) -> String {
+    let mut result = String::new();
+    let mut last = 0;
+    for &start in starts {
+        // push text before match -- This is not bound to always run but it is important
+        result.push_str(&text[last..start]);
+        let highlighted = &text[start..start + word_len];
+        result.push_str(format!("\x1b[38;2;194;93;21m{highlighted}\x1b[0m").as_str());
+        last = start + word_len;
+    }
+    // push remaining tail
+    result.push_str(&text[last..]);
+    result
 }
