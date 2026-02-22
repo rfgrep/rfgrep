@@ -229,10 +229,10 @@ impl OutputFormatter {
         // default one-line-per-match: path:line:col: line-with-highlight
         let mut path: &PathBuf = &matches[0].path;
         output.push_str(&format!("\x1b[38;2;40;172;201m{}\x1b[0m", path.display()));
-        output.push_str("\n");
+        output.push('\n');
         for m in matches {
             let ind_match: Vec<usize> =
-                ::memchr::memmem::find_iter(&m.matched_text.as_bytes(), query.as_bytes()).collect();
+                ::memchr::memmem::find_iter(m.matched_text.as_bytes(), query.as_bytes()).collect();
             let match_indices = ind_match.as_slice();
             let line_len = m.line.len();
             let column_start = m.column_start.min(line_len);
@@ -259,9 +259,9 @@ impl OutputFormatter {
                     ));
                 } else {
                     path = &m.path;
-                    output.push_str("\n");
+                    output.push('\n');
                     output.push_str(&format!("\x1b[38;2;40;172;201m{}\x1b[0m", path.display()));
-                    output.push_str("\n");
+                    output.push('\n');
                     output.push_str(&format!(
                         "\x1b[38;2;167;29;222m{}\x1b[0m: {before}{highlighted}\n",
                         m.line_number,
