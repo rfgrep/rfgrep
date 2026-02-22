@@ -231,12 +231,13 @@ impl OutputFormatter {
 
         // default one-line-per-match: path:line:col: line-with-highlight
         for m in matches {
-            let ind_match = find_match_indices(query, &m.matched_text);
+            let ind_match = find_match_indices(query.as_bytes(), &m.matched_text.as_bytes());
+            println!("text: {}, query: {}", &m.matched_text, query);
             let match_indices = ind_match.as_slice();
             let line_len = m.line.len();
             let column_start = m.column_start;
             let column_end = m.column_end;
-            println!("{:#?}", match_indices);
+            println!("{:#?}", ind_match);
             let before = if column_start < line_len {
                 &m.line[..column_start]
             } else {
@@ -546,18 +547,10 @@ fn escape_html(s: &str) -> String {
         .replace("'", "&#39;")
 }
 
-fn find_match_indices(pattern: &str, matched_text: &str) -> Vec<usize> {
+fn find_match_indices(pattern: &[u8], matched_text: &[u8]) -> Vec<usize> {
     use memchr::memmem;
-    let mut result = Vec::new();
-    // for val in memmem::find_iter(pattern.as_bytes(), matched_text) {
-    //     result.push(val)
-    // }
-    let iterator = memmem::find_iter(pattern.as_bytes(), matched_text);
-    for ind in iterator {
-        result.push(ind);
-    }
-    return result;
-    //iterator
+    let iterator: Vec<_> = memmem::find_iter(matched_text, pattern).collect();
+    return iterator;
 }
 
 fn highlight(text: &str, starts: &[usize], word_len: usize) -> String {
@@ -565,11 +558,9 @@ fn highlight(text: &str, starts: &[usize], word_len: usize) -> String {
     let mut last = 0;
     println!("actual text: {text}");
     for &start in starts {
-        // push text before match
+        // push text before match -- This is not bound to always run but it is important
         result.push_str(&text[last..start]);
         let highlighted = &text[start..start + word_len];
-        // push highlighted match
-        println!("highlighted: {}", highlighted);
         result.push_str(format!("\x1b[33m{highlighted}\x1b[0m").as_str());
         last = start + word_len;
     }
