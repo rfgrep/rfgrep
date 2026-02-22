@@ -1,6 +1,6 @@
 use crate::processor::SearchMatch;
 use serde_json::{json, Value};
-use std::path::Path;
+use std::path::{Path, PathBuf};
 
 /// Output format types
 #[derive(Debug, Clone)]
@@ -230,23 +230,23 @@ impl OutputFormatter {
         // within a matched text.
 
         // default one-line-per-match: path:line:col: line-with-highlight
+        let mut path: &PathBuf = &matches[0].path;
+        output.push_str(&format!("{}", path.display()));
+        output.push_str("\n");
         for m in matches {
-            let ind_match = find_match_indices(query.as_bytes(), &m.matched_text.as_bytes());
-            println!("text: {}, query: {}", &m.matched_text, query);
+            // path = &m.path;
+            let ind_match: Vec<usize> =
+                ::memchr::memmem::find_iter(&m.matched_text.as_bytes(), query.as_bytes()).collect();
             let match_indices = ind_match.as_slice();
             let line_len = m.line.len();
             let column_start = m.column_start;
             let column_end = m.column_end;
-            println!("{:#?}", ind_match);
             let before = if column_start < line_len {
                 &m.line[..column_start]
             } else {
                 ""
             };
             let matched = &m.matched_text;
-            println!("column_end :{} \nline_len: {}", &column_end, &line_len);
-            println!("char at column_end: {}", &m.line[column_end..]);
-            println!("char at column_start: {}", &m.line[column_start..]);
             let after = if column_end < line_len {
                 &m.line[column_end..]
             } else {
@@ -257,14 +257,15 @@ impl OutputFormatter {
             if self.use_color {
                 // ANSI yellow highlight for match
                 let highlighted = highlight(matched.as_str(), match_indices, word_len);
-                // let highlighted = format!("\x1b[33m{matched}\x1b[0m");
-                output.push_str(&format!(
-                    // "{}:{}:{}: {before}{highlighted}{after}\n",
-                    "{}:{}: {highlighted}\n",
-                    m.path.display(),
-                    m.line_number,
-                    // column_start + 1
-                ));
+                if path == &m.path {
+                    output.push_str(&format!("{}: {before}{highlighted}\n", m.line_number,));
+                } else {
+                    path = &m.path;
+                    output.push_str("\n");
+                    output.push_str(&format!("{}", path.display()));
+                    output.push_str("\n");
+                    output.push_str(&format!("{}: {before}{highlighted}\n", m.line_number,));
+                }
             } else {
                 output.push_str(&format!(
                     "{}:{}:{}: {before}{matched}{after}\n",
@@ -547,16 +548,14 @@ fn escape_html(s: &str) -> String {
         .replace("'", "&#39;")
 }
 
-fn find_match_indices(pattern: &[u8], matched_text: &[u8]) -> Vec<usize> {
-    use memchr::memmem;
-    let iterator: Vec<_> = memmem::find_iter(matched_text, pattern).collect();
-    return iterator;
-}
+// fn find_match_indices(pattern: &[u8], matched_text: &[u8]) -> Vec<usize> {
+//     let iterator: Vec<_> = ::memchr::memmem::find_iter(matched_text, pattern).collect();
+//     iterator
+// }
 
 fn highlight(text: &str, starts: &[usize], word_len: usize) -> String {
     let mut result = String::new();
     let mut last = 0;
-    println!("actual text: {text}");
     for &start in starts {
         // push text before match -- This is not bound to always run but it is important
         result.push_str(&text[last..start]);
@@ -564,7 +563,6 @@ fn highlight(text: &str, starts: &[usize], word_len: usize) -> String {
         result.push_str(format!("\x1b[33m{highlighted}\x1b[0m").as_str());
         last = start + word_len;
     }
-
     // push remaining tail
     result.push_str(&text[last..]);
     result
